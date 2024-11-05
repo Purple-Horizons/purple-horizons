@@ -31,7 +31,7 @@ Our approach to navigating and creating the next technological frontier:
 ## 🚀 Quick Start
 
 1. **Join the Community**
-   - Subscribe to our [newsletter](https://purplehorizons.ai/newsletter)
+   - Subscribe to our [newsletter](https://dispatch.purplehorizons.ai/)
    - Follow us on [Twitter](https://twitter.com/purplehorizons8)
    - Connect on [LinkedIn](https://linkedin.com/company/purplehorizons8)
    - Follow us on [Instagram](https://instagram.com/purplehorizons8)
@@ -67,11 +67,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📬 Connect With Us
 
-- Website: [purplehorizons.ai](https://purplehorizons.ai)
+- Website: [purplehorizons.io](https://purplehorizons.io)
 - Twitter: [@purplehorizons8](https://twitter.com/purplehorizons8)
 - LinkedIn: [Purple Horizons](https://linkedin.com/company/purplehorizons8)
 - Instagram: [@purplehorizons8](https://instagram.com/purplehorizons8)
-- Location: Miami, FL
+- Location: South Miami, FL
 
 ## ⭐️ Support
 
@@ -83,5 +83,5 @@ If you find our work valuable, please consider:
 ---
 
 <div align="center">
-Made with 💜 by Purple Horizons in Miami
+Made with 💜 by Purple Horizons in South Miami
 </div>
