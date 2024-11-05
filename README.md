@@ -8,7 +8,7 @@
 [![Stars](https://img.shields.io/github/stars/purple-horizons/purple-horizons?style=social)](https://github.com/purple-horizons/purple-horizons/stargazers)
 [![Twitter Follow](https://img.shields.io/twitter/follow/purplehorizons8?style=social)](https://twitter.com/purplehorizons8)
 
-[Website](https://purplehorizons.ai) • [Events](https://lu.ma/purplehorizons) • [Newsletter](https://purplehorizons.ai/newsletter)
+[Website](https://purplehorizons.io) • [Events](https://lu.ma/purplehorizons) • [Newsletter](https://dispatch.purplehorizons.ai/)
 
 </div>
 
@@ -60,6 +60,23 @@ Our approach to navigating and creating the next technological frontier:
 - **VWLS**: Engaging word game for brand awareness
 - **QuickPod**: AI-powered podcast creation
 - More coming soon!
+
+## 👥 Founders
+
+### Gianni D'Alerta
+Co-Founder | Makes AI do party tricks
+
+A venerated technologist, branding specialist, and marketing maestro with over two decades of industry experience. Founding member of Ethereum and creator of Alienware's iconic identity.
+
+[![GitHub](https://img.shields.io/badge/GitHub-gianni--dalerta-181717?style=flat&logo=github)](https://github.com/gianni-dalerta)
+[![Twitter](https://img.shields.io/badge/Twitter-giannidalerta-1DA1F2?style=flat&logo=twitter)](https://twitter.com/giannidalerta)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-giannidalerta-0077B5?style=flat&logo=linkedin)](https://linkedin.com/in/giannidalerta)
+[![Instagram](https://img.shields.io/badge/Instagram-giannidalerta-E4405F?style=flat&logo=instagram)](https://instagram.com/giannidalerta)
+
+### Ralph Quintero
+Co-Founder | Speaks fluent 'future' to Fortune 500s
+
+Recognized as a visionary leader in strategic advisory within the technology sector. Has orchestrated transactions amounting to billions in sales and spearheaded award-winning teams on a global scale.
 
 ## 📄 License
 
