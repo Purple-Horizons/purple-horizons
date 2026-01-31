@@ -61,6 +61,24 @@ Our approach to navigating and creating the next technological frontier:
 - **QuickPod**: AI-powered podcast creation
 - More coming soon!
 
+## 🦞 Clawdbot / OpenClaw
+
+We're active contributors to the [Clawdbot](https://github.com/clawdbot/clawdbot) ecosystem — the open-source AI agent platform.
+
+### Skills & Tools
+
+| Project | Description |
+|---------|-------------|
+| [**clawdbot/**](./clawdbot/) | Our Clawdbot skills and resources |
+| [**openclaw-porter**](https://github.com/Purple-Horizons/openclaw-porter) | Export and import agents with full context |
+| [**openclaw-voice**](https://github.com/Purple-Horizons/openclaw-voice) | Self-hosted voice interface for AI assistants |
+
+### Featured Skills
+
+- **[Session Continuity](./clawdbot/skills/session-continuity/)** — Never lose context to compaction. Proactive state management that survives any session reset.
+
+👉 Explore our [clawdbot/](./clawdbot/) directory for installation instructions and more skills.
+
 ## 👥 Founders
 
 ### Gianni D'Alerta
