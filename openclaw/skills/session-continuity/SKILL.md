@@ -144,6 +144,8 @@ Ensure these are enabled in `openclaw.json`:
 }
 ```
 
+**Note (OpenClaw 2026.1.30+):** Compaction now summarizes dropped messages automatically. This skill complements that by maintaining a proactive state file — you get both the automatic summary AND your detailed task state.
+
 ## AGENTS.md Integration
 
 Add to your AGENTS.md:
@@ -235,4 +237,4 @@ Based on community patterns:
 - Bookend approach (MARVIN)
 - OpenClaw pre-compaction flush
 - GitHub Issue #2597 (context visibility)
-- r/openclaw discussions
+- r/openclaw community discussions

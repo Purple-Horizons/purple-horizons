@@ -117,6 +117,8 @@ Edit `~/.openclaw/openclaw.json` to update `subagents.allowAgents` arrays, then:
 openclaw gateway restart --reason "Updated subagent permissions"
 ```
 
+**Note (OpenClaw 2026.1.30+):** Sub-agent announce routing now prefers `requesterOrigin` over stale session entries, improving result delivery reliability.
+
 ## Example Audit Script
 
 ```python
