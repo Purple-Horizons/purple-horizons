@@ -1,18 +1,13 @@
 # X Engagement
 
-A Clawdbot skill that automatically finds people discussing relevant pain points when you post on X/Twitter, then crafts contextual replies to boost visibility.
+An OpenClaw skill that automatically finds people discussing relevant pain points when you post on X/Twitter, then crafts contextual replies to boost visibility.
 
 ## Installation
 
-Install via ClawdHub:
+Copy to skills directory:
 
 ```bash
-clawdhub install x-engagement
-```
-
-Or manually:
-```bash
-git clone https://github.com/Purple-Horizons/x-engagement ~/.clawdbot/skills/x-engagement
+cp -r x-engagement ~/.openclaw/skills/
 ```
 
 ## Usage

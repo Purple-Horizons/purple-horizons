@@ -50,15 +50,12 @@ Apply recommended fixes? [y/n]
 
 ```bash
 # Copy to skills directory
-cp -r subagent-optimizer ~/.clawdbot/skills/
-
-# Or via ClawdHub
-clawdhub install purple-horizons/subagent-optimizer
+cp -r subagent-optimizer ~/.openclaw/skills/
 ```
 
 ## Config Requirements
 
-Agents need `subagents.allowAgents` in clawdbot.json:
+Agents need `subagents.allowAgents` in openclaw.json:
 
 ```json
 {

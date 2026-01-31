@@ -61,25 +61,24 @@ Our approach to navigating and creating the next technological frontier:
 - **QuickPod**: AI-powered podcast creation
 - More coming soon!
 
-## 🦞 Clawdbot / OpenClaw
+## 🦞 OpenClaw
 
-We're active contributors to the [Clawdbot](https://github.com/clawdbot/clawdbot) ecosystem — the open-source AI agent platform.
+We're active contributors to the [OpenClaw](https://github.com/openclaw/openclaw) ecosystem — the open-source AI agent platform.
 
 ### Skills & Tools
 
 | Project | Description |
 |---------|-------------|
-| [**clawdbot/**](./clawdbot/) | Our Clawdbot skills and resources |
+| [**openclaw/**](./openclaw/) | Our OpenClaw skills and resources |
 | [**openclaw-porter**](https://github.com/Purple-Horizons/openclaw-porter) | Export and import agents with full context |
 | [**openclaw-voice**](https://github.com/Purple-Horizons/openclaw-voice) | Self-hosted voice interface for AI assistants |
 
 ### Featured Skills
 
-- **[Session Continuity](./clawdbot/skills/session-continuity/)** — Never lose context to compaction. Proactive state management that survives any session reset.
-- **[Sub-Agent Optimizer](./clawdbot/skills/subagent-optimizer/)** — Identify opportunities to parallelize work using sub-agents. Turn sequential 5-minute tasks into 1-minute parallel execution.
-- **[X Engagement](./clawdbot/skills/x-engagement/)** — Auto-find and reply to people with relevant pain points when you post on X. Two rounds max to stay safe from throttling.
+- **[Session Continuity](./openclaw/skills/session-continuity/)** — Never lose context to compaction. Proactive state management that survives any session reset.
+- **[Sub-Agent Optimizer](./openclaw/skills/subagent-optimizer/)** — Identify opportunities to parallelize work using sub-agents. Turn sequential 5-minute tasks into 1-minute parallel execution.
 
-👉 Explore our [clawdbot/](./clawdbot/) directory for installation instructions and more skills.
+👉 Explore our [openclaw/](./openclaw/) directory for installation instructions and more skills.
 
 ## 👥 Founders
 

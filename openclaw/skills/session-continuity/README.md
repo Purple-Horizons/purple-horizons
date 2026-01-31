@@ -27,12 +27,12 @@ When compaction hits, the agent reads this file and picks up exactly where it le
 ### 1. Create state directory
 
 ```bash
-mkdir -p ~/clawd/state/checkpoints
+mkdir -p ~/workspace/state/checkpoints
 ```
 
 ### 2. Enable pre-compaction flush
 
-Add to your `clawdbot.json`:
+Add to your `openclaw.json`:
 
 ```json
 {
@@ -105,8 +105,8 @@ Updated: 2026-01-31 10:30 EST
 
 Based on community patterns from:
 - Bookend/MARVIN approach
-- Clawdbot GitHub Issue #2597
-- r/moltbot and r/clawdbot discussions
+- OpenClaw GitHub discussions
+- r/openclaw community
 
 ## License
 

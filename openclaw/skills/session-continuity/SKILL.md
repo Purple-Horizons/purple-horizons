@@ -1,6 +1,6 @@
 ---
 name: session-continuity
-description: Never lose context to compaction. Proactive state management that survives any session reset, compaction, or context overflow. Based on community patterns (Bookend, MARVIN) and Clawdbot architecture research.
+description: Never lose context to compaction. Proactive state management that survives any session reset, compaction, or context overflow. Based on community patterns (Bookend, MARVIN) and OpenClaw architecture research.
 ---
 
 # Session Continuity Skill
@@ -19,7 +19,7 @@ description: Never lose context to compaction. Proactive state management that s
 |------|---------|
 | `state/current.md` | Single source of truth — what you're working on RIGHT NOW |
 | `state/checkpoints/` | Timestamped snapshots (auto-created) |
-| `memory/YYYY-MM-DD.md` | Daily logs (existing Clawdbot pattern) |
+| `memory/YYYY-MM-DD.md` | Daily logs (existing OpenClaw pattern) |
 
 ## State File Format
 
@@ -124,7 +124,7 @@ If state file is missing or corrupted:
 
 ## Config Recommendations
 
-Ensure these are enabled in `clawdbot.json`:
+Ensure these are enabled in `openclaw.json`:
 
 ```json
 {
@@ -233,6 +233,6 @@ Use this skill when:
 
 Based on community patterns:
 - Bookend approach (MARVIN)
-- Clawdbot pre-compaction flush
+- OpenClaw pre-compaction flush
 - GitHub Issue #2597 (context visibility)
-- r/moltbot and r/clawdbot discussions
+- r/openclaw discussions

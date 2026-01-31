@@ -76,7 +76,7 @@ When triggered with "optimize agents" or "audit agent config":
 ### Step 1: Read Current Config
 
 ```bash
-cat ~/.clawdbot/clawdbot.json | jq '.agents.list[] | {id: .id, name: .name, subagents: .subagents}'
+cat ~/.openclaw/openclaw.json | jq '.agents.list[] | {id: .id, name: .name, subagents: .subagents}'
 ```
 
 ### Step 2: Analyze Each Agent
@@ -110,11 +110,11 @@ Apply recommended fixes? [y/n]
 
 ### Step 5: Apply Fixes (with confirmation)
 
-Edit `~/.clawdbot/clawdbot.json` to update `subagents.allowAgents` arrays, then:
+Edit `~/.openclaw/openclaw.json` to update `subagents.allowAgents` arrays, then:
 
 ```bash
 # Restart gateway to apply
-gateway restart --reason "Updated subagent permissions"
+openclaw gateway restart --reason "Updated subagent permissions"
 ```
 
 ## Example Audit Script
@@ -122,7 +122,7 @@ gateway restart --reason "Updated subagent permissions"
 ```python
 # Pseudo-code for audit logic
 def audit_agents():
-    config = read_config("~/.clawdbot/clawdbot.json")
+    config = read_config("~/.openclaw/openclaw.json")
     recommendations = []
     
     for agent in config.agents.list:

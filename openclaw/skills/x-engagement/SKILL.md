@@ -114,7 +114,7 @@ Round 2:
 
 **Search queries:**
 - `"agent forgets" OR "context lost" OR "mid-task amnesia"`
-- `"OpenClaw memory" OR "Clawdbot context"`
+- `"OpenClaw memory" OR "OpenClaw context"`
 - `"just installed OpenClaw"`
 - `@openclaw skill`
 
