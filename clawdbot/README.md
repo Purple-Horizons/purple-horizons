@@ -8,6 +8,7 @@ Purple Horizons' collection of skills, tools, and resources for [Clawdbot](https
 |-------|-------------|
 | [session-continuity](./skills/session-continuity/) | Never lose context to compaction. Proactive state management for uninterrupted agent work. |
 | [subagent-optimizer](./skills/subagent-optimizer/) | Identify opportunities to parallelize work using sub-agents. Turn sequential tasks into concurrent execution. |
+| [x-engagement](./skills/x-engagement/) | Auto-find and reply to people with relevant pain points when you post on X. Two rounds max (8 replies) to stay safe from throttling. |
 
 ## Related Projects
 
