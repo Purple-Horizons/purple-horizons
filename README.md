@@ -77,6 +77,7 @@ We're active contributors to the [Clawdbot](https://github.com/clawdbot/clawdbot
 
 - **[Session Continuity](./clawdbot/skills/session-continuity/)** — Never lose context to compaction. Proactive state management that survives any session reset.
 - **[Sub-Agent Optimizer](./clawdbot/skills/subagent-optimizer/)** — Identify opportunities to parallelize work using sub-agents. Turn sequential 5-minute tasks into 1-minute parallel execution.
+- **[X Engagement](./clawdbot/skills/x-engagement/)** — Auto-find and reply to people with relevant pain points when you post on X. Two rounds max to stay safe from throttling.
 
 👉 Explore our [clawdbot/](./clawdbot/) directory for installation instructions and more skills.
 
