@@ -5,9 +5,17 @@ description: Identify opportunities to parallelize work using sub-agents. Use wh
 
 # Sub-Agent Optimizer
 
-Recognize when to spawn sub-agents for parallel execution instead of sequential work.
+Recognize when to spawn sub-agents for parallel execution, and audit agent configs to enable sub-agent capabilities.
 
-## The Decision Framework
+## Two Modes
+
+### 1. Runtime Mode (Pattern Recognition)
+Triggers automatically when receiving parallelizable tasks.
+
+### 2. Audit Mode (Config Optimization)
+Triggers on: "optimize agents", "audit agent config", "check subagent permissions"
+
+## Runtime Mode: Decision Framework
 
 **Spawn sub-agents when:**
 - Task has multiple independent items (5 leads, 3 drafts, 10 links)
@@ -27,8 +35,8 @@ Recognize when to spawn sub-agents for parallel execution instead of sequential 
 
 | Pattern | Example | Action |
 |---------|---------|--------|
-| "Research these N companies" | "Research these 5 leads" | Spawn N scout workers |
-| "Create N variations" | "Write 3 tweet options" | Spawn N content workers |
+| "Research these N items" | "Research these 5 companies" | Spawn N research workers |
+| "Create N variations" | "Write 3 headline options" | Spawn N content workers |
 | "Check/verify all of X" | "Verify all 10 links work" | Spawn workers per batch |
 | "For each X, do Y" | "For each competitor, analyze pricing" | Spawn per item |
 | "In parallel" / "simultaneously" | "Research both simultaneously" | Explicit parallel request |
@@ -45,58 +53,117 @@ Recognize when to spawn sub-agents for parallel execution instead of sequential 
 # Standard parallel spawn
 for item in items:
     sessions_spawn(
-        agentId="scout",  # or self for same-type work
+        agentId="research-agent",  # or same type for parallel work
         task=f"[Specific task for {item}]. Return: [expected output format]."
     )
 
-# With result aggregation
-results = []
-for item in items:
-    sessions_spawn(
-        agentId="scout",
-        task=f"Research {item}. Return JSON: {{company, summary, decision_makers, score}}"
-    )
 # Results announce back → aggregate → deliver
 ```
 
 ## Sub-Agent Selection
 
-| Task Type | Spawn Agent | Why |
-|-----------|-------------|-----|
-| Research, fact-finding | scout | Research-optimized |
-| Content drafts, copy | rex (or self) | Voice-consistent |
-| Lead research | scout | Deep research tools |
-| Personalization at scale | self | Context-aware |
+| Task Type | Spawn Agent Type | Why |
+|-----------|------------------|-----|
+| Research, fact-finding | Research-specialized agent | Optimized for discovery |
+| Content drafts, copy | Content agent (or self) | Voice-consistent |
+| Data processing | Self (parallel instances) | Same capabilities needed |
+| Personalization at scale | Self | Context-aware |
 
-## Example Transformations
+## Audit Mode: Config Optimization
 
-### Before (Sequential)
-```
-User: "Research Apple, Google, and Microsoft's AI strategies"
-Agent: *researches Apple* ... *researches Google* ... *researches Microsoft*
-Time: 3 minutes
-```
+When triggered with "optimize agents" or "audit agent config":
 
-### After (Parallel)
-```
-User: "Research Apple, Google, and Microsoft's AI strategies"
-Agent: *spawns 3 scout workers simultaneously*
-  - scout:sub:001 → Apple
-  - scout:sub:002 → Google  
-  - scout:sub:003 → Microsoft
-*all report back within 60 seconds*
-*agent synthesizes and delivers*
-Time: 1 minute
+### Step 1: Read Current Config
+
+```bash
+cat ~/.clawdbot/clawdbot.json | jq '.agents.list[] | {id: .id, name: .name, subagents: .subagents}'
 ```
 
-## Self-Check Questions
+### Step 2: Analyze Each Agent
 
-Before starting multi-item work, ask:
+For each agent, check:
+- Can it spawn sub-agents of its own type? (parallel self-work)
+- Can it spawn research agents? (delegation)
+- Can it escalate to orchestrator? (getting help)
 
-1. **Are items independent?** → If yes, parallelize
-2. **Would I repeat similar steps for each?** → If yes, parallelize
-3. **Does order matter?** → If no, parallelize
-4. **Is this >3 items?** → If yes, strongly consider parallelizing
+### Step 3: Identify Gaps
+
+Common issues:
+- Agent can only spawn "main" (can't parallelize own work)
+- Research agent can't spawn itself (can't parallel research)
+- Content agent can't spawn research (can't delegate discovery)
+
+### Step 4: Recommend Fixes
+
+```
+AUDIT RESULTS:
+
+✅ orchestrator: Can spawn [content, research, sales] — Good
+⚠️  content-agent: Can only spawn [main] — Limited
+   → Recommend: Add [content, research] for parallel drafts + research delegation
+⚠️  research-agent: Can only spawn [main] — Limited  
+   → Recommend: Add [research] for parallel deep-dives
+✅ sales-agent: Can spawn [sales, research, main] — Good
+
+Apply recommended fixes? [y/n]
+```
+
+### Step 5: Apply Fixes (with confirmation)
+
+Edit `~/.clawdbot/clawdbot.json` to update `subagents.allowAgents` arrays, then:
+
+```bash
+# Restart gateway to apply
+gateway restart --reason "Updated subagent permissions"
+```
+
+## Example Audit Script
+
+```python
+# Pseudo-code for audit logic
+def audit_agents():
+    config = read_config("~/.clawdbot/clawdbot.json")
+    recommendations = []
+    
+    for agent in config.agents.list:
+        allowed = agent.subagents.allowAgents or []
+        agent_type = agent.id
+        
+        # Check: Can agent parallelize its own work?
+        if agent_type not in allowed:
+            recommendations.append({
+                "agent": agent_type,
+                "add": agent_type,
+                "reason": "Enable parallel self-spawning"
+            })
+        
+        # Check: Can agent delegate research?
+        if "research" not in allowed and agent_type != "research":
+            recommendations.append({
+                "agent": agent_type,
+                "add": "research",
+                "reason": "Enable research delegation"
+            })
+    
+    return recommendations
+```
+
+## Integration
+
+Add to AGENTS.md for persistent behavior:
+
+```markdown
+### Sub-Agent Parallelization
+
+When receiving tasks with multiple items:
+1. Check if items are independent
+2. Spawn sub-agents for parallel execution
+3. Aggregate results when all complete
+
+Use `sessions_spawn` with appropriate agentId. Batch large requests (5-8 at a time).
+
+To audit permissions: "optimize agents" or "audit agent config"
+```
 
 ## Anti-Patterns
 
@@ -104,19 +171,4 @@ Before starting multi-item work, ask:
 ❌ Spawning when items depend on each other
 ❌ Spawning 20+ workers simultaneously (rate limits)
 ❌ Forgetting to aggregate results after spawn
-
-## Integration
-
-Add to your AGENTS.md:
-
-```markdown
-### Sub-Agent Parallelization
-
-When receiving tasks with multiple items (research 5 leads, create 3 drafts, etc.):
-1. Check if items are independent
-2. Spawn sub-agents for parallel execution
-3. Aggregate results when all complete
-4. Deliver synthesized output
-
-Use `sessions_spawn` with appropriate agentId. Batch large requests (5-8 at a time).
-```
+❌ Agents that can't spawn themselves (limits parallelization)

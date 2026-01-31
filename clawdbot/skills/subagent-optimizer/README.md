@@ -1,47 +1,80 @@
 # Sub-Agent Optimizer
 
-Teaches AI agents to recognize opportunities for parallel sub-agent execution.
+Teaches AI agents to recognize parallelization opportunities AND audit/fix agent configs.
+
+## Two Modes
+
+### 1. Runtime Mode
+Pattern recognition for parallelizable tasks. Agents learn to spawn sub-agents instead of processing sequentially.
+
+**Triggers:** "Research these 5 items", "Create 3 variations", "For each X do Y"
+
+### 2. Audit Mode  
+Inspect agent configs, identify gaps in sub-agent permissions, suggest/apply fixes.
+
+**Triggers:** "optimize agents", "audit agent config", "check subagent permissions"
 
 ## The Problem
 
-Agents default to sequential processing. When asked to "research 5 companies," they research one, then the next, then the next. This wastes time when items are independent.
+1. **Sequential processing:** Agents do tasks one-by-one when they could parallelize
+2. **Limited permissions:** Agents often can't spawn sub-agents (config not set up)
 
 ## The Solution
 
-Pattern recognition for parallelizable work. Agents learn to:
-- Identify multi-item independent tasks
-- Spawn sub-agents for parallel execution
-- Aggregate results efficiently
+- Pattern recognition teaches agents WHEN to parallelize
+- Audit mode checks configs and fixes permission gaps
 
-## Triggers
+## Audit Example
 
-- "Research these N items"
-- "Create N variations"
-- "Check all of these"
-- "For each X, do Y"
-- Any batch operation with 3+ independent items
+```
+$ "audit agent config"
 
-## Example
+AUDIT RESULTS:
 
-**Before:** 5 lead research tasks → 5 minutes sequential
-**After:** 5 scout workers in parallel → 1 minute
+✅ orchestrator: Can spawn [content, research, sales] — Good
+⚠️  content-agent: Can only spawn [main] — Limited
+   → Recommend: Add [content, research]
+⚠️  research-agent: Can only spawn [main] — Limited
+   → Recommend: Add [research]
+✅ sales-agent: Can spawn [sales, research, main] — Good
+
+Apply recommended fixes? [y/n]
+```
+
+## Runtime Example
+
+**Before:** 5 research tasks → 5 minutes sequential  
+**After:** 5 workers in parallel → 1 minute
 
 ## Installation
 
 ```bash
-# Already in your skills directory
-# Skill auto-loads when patterns match
+# Copy to skills directory
+cp -r subagent-optimizer ~/.clawdbot/skills/
+
+# Or via ClawdHub
+clawdhub install purple-horizons/subagent-optimizer
 ```
 
-## Integration
+## Config Requirements
 
-Add to agent's AGENTS.md for persistent behavior:
+Agents need `subagents.allowAgents` in clawdbot.json:
 
-```markdown
-### Sub-Agent Parallelization
-When receiving multi-item tasks, spawn sub-agents for parallel execution.
-See skill: subagent-optimizer
+```json
+{
+  "id": "content-agent",
+  "subagents": {
+    "allowAgents": ["content-agent", "research-agent", "main"]
+  }
+}
 ```
+
+## Best Practices
+
+- Agents should be able to spawn themselves (parallel self-work)
+- Research agents should be spawnable by others (delegation)
+- Orchestrator should spawn all agent types
+- Batch large spawns (5-8 at a time)
 
 ## License
 
