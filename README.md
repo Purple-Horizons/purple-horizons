@@ -80,6 +80,16 @@ We're active contributors to the [OpenClaw](https://github.com/openclaw/openclaw
 
 👉 Explore our [openclaw/](./openclaw/) directory for installation instructions and more skills.
 
+## 🔌 MCP Servers
+
+We build open-source [Model Context Protocol](https://modelcontextprotocol.io/) servers that give AI assistants superpowers.
+
+| Server | Description |
+|--------|-------------|
+| [**gamma-mcp**](https://github.com/Purple-Horizons/gamma-mcp) | Generate presentations, documents & websites with Gamma.app |
+| [**printful-mcp**](https://github.com/Purple-Horizons/printful-mcp) | Print-on-demand automation — catalog, orders, mockups, shipping |
+| [**cloze-mcp**](https://github.com/Purple-Horizons/cloze-mcp) | CRM integration for Cloze — contacts, companies, deals |
+
 ## 👥 Founders
 
 ### Gianni D'Alerta
