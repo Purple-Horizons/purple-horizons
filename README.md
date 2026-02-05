@@ -76,10 +76,14 @@ We're active contributors to the [OpenClaw](https://github.com/openclaw/openclaw
 
 ### Featured Skills
 
-- **[Session Continuity](./openclaw/skills/session-continuity/)** — Never lose context to compaction. Proactive state management that survives any session reset.
-- **[Sub-Agent Optimizer](./openclaw/skills/subagent-optimizer/)** — Identify opportunities to parallelize work using sub-agents. Turn sequential 5-minute tasks into 1-minute parallel execution.
+| Skill | Description |
+|-------|-------------|
+| [**fal-ai**](./openclaw/skills/fal-ai/) | Universal wrapper for 100+ fal.ai models — images, video, music, upscaling |
+| [**x-engagement**](./openclaw/skills/x-engagement/) | Auto-find and reply to people discussing your topics on X/Twitter |
+| [**session-continuity**](./openclaw/skills/session-continuity/) | Never lose context to compaction — proactive state management |
+| [**subagent-optimizer**](./openclaw/skills/subagent-optimizer/) | Parallelize work with sub-agents — turn 5-min sequential into 1-min parallel |
 
-👉 Explore our [openclaw/](./openclaw/) directory for installation instructions and more skills.
+👉 Explore our [openclaw/skills/](./openclaw/skills/) directory for installation instructions and more.
 
 ## 🔌 MCP Servers
 
@@ -87,6 +91,7 @@ We build open-source [Model Context Protocol](https://modelcontextprotocol.io/) 
 
 | Server | Description |
 |--------|-------------|
+| [**sanity-mcp**](https://github.com/Purple-Horizons/sanity-mcp) | Full Sanity CMS integration — query, create, update, delete documents via GROQ |
 | [**gamma-mcp**](https://github.com/Purple-Horizons/gamma-mcp) | Generate presentations, documents & websites with Gamma.app |
 | [**printful-mcp**](https://github.com/Purple-Horizons/printful-mcp) | Print-on-demand automation — catalog, orders, mockups, shipping |
 | [**cloze-mcp**](https://github.com/Purple-Horizons/cloze-mcp) | CRM integration for Cloze — contacts, companies, deals |
