@@ -70,6 +70,7 @@ We're active contributors to the [OpenClaw](https://github.com/openclaw/openclaw
 | Project | Description |
 |---------|-------------|
 | [**openclaw/**](./openclaw/) | Our OpenClaw skills and resources |
+| [**openclaw-memory-tools**](https://github.com/Purple-Horizons/openclaw-memory-tools) | Agent-controlled persistent memory with confidence scoring and semantic search |
 | [**openclaw-porter**](https://github.com/Purple-Horizons/openclaw-porter) | Export and import agents with full context |
 | [**openclaw-voice**](https://github.com/Purple-Horizons/openclaw-voice) | Self-hosted voice interface for AI assistants |
 
