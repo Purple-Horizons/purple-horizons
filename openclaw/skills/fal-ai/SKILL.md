@@ -1,13 +1,13 @@
 ---
 name: fal-ai
-description: Generate images, videos, music, and more using fal.ai's model library. Supports 100+ models including Flux, Stable Diffusion, video generation, upscaling, and audio.
+description: Generate images, videos, music, and more using fal.ai's 600+ model library. Powered by official fal-client with auto-queue, file uploads, streaming, and smart defaults.
 homepage: https://fal.ai
-metadata: {"openclaw":{"emoji":"🎨","requires":{"env":["FAL_KEY"]}}}
+metadata: {"openclaw":{"emoji":"🎨","requires":{"env":["FAL_KEY"],"pip":["fal-client"]}}}
 ---
 
 # fal-ai
 
-Universal wrapper for [fal.ai](https://fal.ai) — access 100+ AI models for image generation, video, music, upscaling, and more.
+Universal CLI for [fal.ai](https://fal.ai) — access 600+ AI models for image generation, video, music, upscaling, and more. Built on the official `fal-client` with auto-queue polling, file uploads, and streaming.
 
 ## Setup
 
@@ -16,24 +16,63 @@ Universal wrapper for [fal.ai](https://fal.ai) — access 100+ AI models for ima
    ```bash
    export FAL_KEY="your-key-here"
    ```
+3. Install the client:
+   ```bash
+   pip3 install fal-client
+   ```
 
-## Usage
+## Quick Commands
 
 ```bash
-# Generate an image
-python3 fal.py generate "fal-ai/flux/schnell" '{"prompt": "a robot reading a book"}'
+# Generate an image (default: nano-banana-pro / Google Imagen 3)
+python3 fal.py image "vibrant Miami sunset over Brickell"
 
-# Generate music
-python3 fal.py generate "fal-ai/minimax-music/v2" '{"prompt": "upbeat electronic track"}'
+# Save to file
+python3 fal.py image "logo design" --save logo.png
 
-# Upscale a video
-python3 fal.py generate-queue "fal-ai/flashvsr/upscale/video" '{"video_url": "https://..."}'
+# Use a different model
+python3 fal.py image "abstract art" --model fal-ai/flux-pro/v1.1
 
+# Change size (square_hd, landscape_4_3, portrait_4_3, landscape_16_9, portrait_16_9)
+python3 fal.py image "headshot" --size square_hd
+
+# Generate a video
+python3 fal.py video "ocean waves crashing" --save waves.mp4
+
+# Image-to-video
+python3 fal.py video "slow zoom in" --image https://example.com/photo.jpg
+```
+
+## Core Commands
+
+```bash
+# Run any model with auto-queue + polling (recommended for everything)
+python3 fal.py subscribe <model> '<json_params>'
+
+# Run directly (fast models only, <30s)
+python3 fal.py run <model> '<json_params>'
+
+# Submit and get request_id (check later)
+python3 fal.py submit <model> '<json_params>'
+python3 fal.py status <model> <request_id>
+python3 fal.py result <model> <request_id>
+python3 fal.py cancel <model> <request_id>
+
+# Stream results (SSE-compatible models)
+python3 fal.py stream <model> '<json_params>'
+
+# Upload a local file → get fal URL
+python3 fal.py upload ./my-photo.jpg
+```
+
+## Discovery
+
+```bash
 # Search for models
-python3 fal.py search "video generation"
+python3 fal.py models "video generation"
 
-# Get model schema (see required parameters)
-python3 fal.py schema "fal-ai/flux/schnell"
+# Get model schema (see required/optional params)
+python3 fal.py schema fal-ai/nano-banana-pro
 ```
 
 ## Popular Models
@@ -41,9 +80,9 @@ python3 fal.py schema "fal-ai/flux/schnell"
 ### Image Generation
 | Model | Cost | Notes |
 |-------|------|-------|
-| `fal-ai/flux/schnell` | $0.003 | Fast, great quality |
-| `fal-ai/flux-pro/v1.1` | $0.05 | Best quality |
-| `fal-ai/nano-banana-pro` | $0.15 | Google Imagen 3, great typography |
+| `fal-ai/nano-banana-pro` | $0.15 | **Default** — Google Imagen 3, bright/vibrant, great typography |
+| `fal-ai/flux/schnell` | $0.003 | Fast, good quality |
+| `fal-ai/flux-pro/v1.1` | $0.05 | Best quality FLUX |
 | `fal-ai/stable-diffusion-v3-medium` | $0.035 | SD3 |
 
 ### Video Generation
@@ -52,6 +91,7 @@ python3 fal.py schema "fal-ai/flux/schnell"
 | `fal-ai/minimax-video/video-01-live` | ~$0.50 | MiniMax video |
 | `fal-ai/kling-video/v1.5/pro` | ~$0.30 | Kling video |
 | `fal-ai/luma-dream-machine` | ~$0.30 | Luma Labs |
+| `fal-ai/wan/v2.1/1.3b/text-to-video` | varies | WAN 2.1 |
 
 ### Video Upscaling
 | Model | Cost | Notes |
@@ -65,62 +105,44 @@ python3 fal.py schema "fal-ai/flux/schnell"
 | `fal-ai/elevenlabs/music` | varies | ElevenLabs text-to-music |
 | `fal-ai/minimax-music/v2` | varies | MiniMax music generation |
 
-## Commands
+### Speech & Transcription
+| Model | Cost | Notes |
+|-------|------|-------|
+| `fal-ai/whisper` | varies | Speech-to-text |
 
-| Command | Description |
-|---------|-------------|
-| `generate <model> <json>` | Run model directly (fast, small jobs) |
-| `generate-queue <model> <json>` | Run via queue (longer jobs) |
-| `models` | List all available models |
-| `search <keywords>` | Search for models |
-| `schema <model>` | Get model's input schema |
-| `status <url>` | Check queued job status |
-| `result <url>` | Get completed job result |
-| `cancel <url>` | Cancel queued job |
+### LLMs
+| Model | Cost | Notes |
+|-------|------|-------|
+| `fal-ai/any-llm` | varies | Use any LLM via fal |
 
-## Examples
+## Legacy Aliases
 
-### Generate an image and save it
+`generate` and `generate-queue` still work — both map to `subscribe`.
+
+## File Uploads
+
+For models that need image/video/audio input, upload first:
+
 ```bash
-# Generate
-python3 fal.py generate "fal-ai/flux/schnell" '{"prompt": "cyberpunk cityscape at night"}' > result.json
+# Upload local file
+python3 fal.py upload ./photo.jpg
+# Returns: {"url": "https://fal.media/files/..."}
 
-# Extract URL (the response includes image URLs)
-cat result.json | jq -r '.images[0].url'
+# Use the URL as input
+python3 fal.py subscribe fal-ai/flux/dev/image-to-image '{"image_url": "https://fal.media/files/...", "prompt": "oil painting style"}'
 ```
 
-### Queue a long video job
+## Workflows
+
+Chain models by using output URLs as inputs:
+
 ```bash
-# Submit to queue
-python3 fal.py generate-queue "fal-ai/minimax-video/video-01-live" \
-  '{"prompt": "a cat playing piano"}' > queue.json
+# 1. Generate image
+python3 fal.py image "cyberpunk city" --save city.png
 
-# Check status
-python3 fal.py status "$(cat queue.json | jq -r '.status_url')"
+# 2. Upload it
+python3 fal.py upload ./city.png
 
-# Get result when done
-python3 fal.py result "$(cat queue.json | jq -r '.response_url')"
+# 3. Animate it
+python3 fal.py video "camera slowly panning across" --image "https://fal.media/files/..."
 ```
-
-### Reference image (image-to-image)
-```bash
-python3 fal.py generate "fal-ai/flux/dev/image-to-image" '{
-  "prompt": "make it look like a watercolor painting",
-  "image_url": "https://example.com/photo.jpg",
-  "strength": 0.7
-}'
-```
-
-## Tips
-
-- Use `generate` for fast models (< 30s)
-- Use `generate-queue` for slow models (video, large images)
-- Check `schema` to see required/optional parameters
-- Most image models return `images[0].url` in the response
-- Video models typically return `video.url`
-
-## Links
-
-- [fal.ai Model Library](https://fal.ai/models)
-- [fal.ai Pricing](https://fal.ai/pricing)
-- [API Docs](https://fal.ai/docs)

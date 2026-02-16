@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-fal.ai CLI for Clawdbot
-Generate images and content using fal.ai models
+fal.ai CLI — powered by official fal-client
+Generate images, videos, music, and more using 600+ fal.ai models.
 """
 
 import os
@@ -9,177 +9,345 @@ import sys
 import json
 import urllib.request
 import urllib.error
-from typing import Optional, Dict, Any
+import urllib.parse
+from typing import Optional
 
-# API endpoints
-FAL_BASE_URL = "https://fal.ai/api"
-FAL_QUEUE_URL = "https://queue.fal.run"
-FAL_DIRECT_URL = "https://fal.run"
+# ── Helpers ──────────────────────────────────────────────────────────────────
 
-def get_api_key() -> str:
-    """Get FAL_KEY from environment"""
+def get_key() -> str:
     key = os.environ.get("FAL_KEY")
     if not key:
-        print("Error: FAL_KEY environment variable not set", file=sys.stderr)
+        print("Error: FAL_KEY not set", file=sys.stderr)
         sys.exit(1)
     return key
 
-def api_request(url: str, method: str = "GET", data: Optional[Dict] = None, auth: bool = True) -> Dict:
-    """Make API request to fal.ai"""
-    headers = {"Content-Type": "application/json"}
-    if auth:
-        headers["Authorization"] = f"Key {get_api_key()}"
-    
-    req_data = json.dumps(data).encode() if data else None
-    req = urllib.request.Request(url, data=req_data, headers=headers, method=method)
-    
+def ensure_client():
     try:
-        with urllib.request.urlopen(req, timeout=120) as response:
-            return json.loads(response.read().decode())
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode()
-        print(f"API Error [{e.code}]: {error_body}", file=sys.stderr)
-        sys.exit(1)
-    except urllib.error.URLError as e:
-        print(f"Request Error: {e.reason}", file=sys.stderr)
+        import fal_client
+        return fal_client
+    except ImportError:
+        print("Error: fal-client not installed. Run: pip3 install fal-client", file=sys.stderr)
         sys.exit(1)
 
-def cmd_models(page: Optional[int] = None, total: Optional[int] = None):
-    """List available models"""
-    url = f"{FAL_BASE_URL}/models"
-    params = []
-    if page is not None:
-        params.append(f"page={page}")
-    if total is not None:
-        params.append(f"total={total}")
-    if params:
-        url += "?" + "&".join(params)
-    
-    result = api_request(url, auth=False)
-    print(json.dumps(result, indent=2))
-
-def cmd_search(keywords: str):
-    """Search for models"""
-    url = f"{FAL_BASE_URL}/models?keywords={urllib.parse.quote(keywords)}"
-    result = api_request(url, auth=False)
-    print(json.dumps(result, indent=2))
-
-def cmd_schema(model_id: str):
-    """Get model schema"""
-    url = f"{FAL_BASE_URL}/openapi/queue/openapi.json?endpoint_id={urllib.parse.quote(model_id)}"
-    result = api_request(url, auth=False)
-    print(json.dumps(result, indent=2))
-
-def cmd_generate(model: str, parameters: str, queue: bool = False):
-    """Generate content using a model"""
+def parse_json(s: str) -> dict:
     try:
-        params = json.loads(parameters)
+        return json.loads(s)
     except json.JSONDecodeError as e:
-        print(f"Invalid JSON parameters: {e}", file=sys.stderr)
+        print(f"Invalid JSON: {e}", file=sys.stderr)
         sys.exit(1)
-    
-    if queue:
-        url = f"{FAL_QUEUE_URL}/{model}"
-    else:
-        url = f"{FAL_DIRECT_URL}/{model}"
-    
-    result = api_request(url, method="POST", data=params)
+
+def on_queue_update(update):
+    """Print queue status updates to stderr."""
+    if hasattr(update, 'logs') and update.logs:
+        for log in update.logs:
+            msg = log.get("message", str(log)) if isinstance(log, dict) else str(log)
+            print(f"  {msg}", file=sys.stderr)
+    status_name = type(update).__name__
+    if status_name == "Queued":
+        pos = getattr(update, 'position', '?')
+        print(f"⏳ Queued (position {pos})", file=sys.stderr)
+    elif status_name == "InProgress":
+        print(f"⚙️  In progress...", file=sys.stderr)
+    elif status_name == "Completed":
+        print(f"✅ Done", file=sys.stderr)
+
+def download_file(url: str, path: str):
+    """Download a URL to a local file."""
+    print(f"Downloading → {path}", file=sys.stderr)
+    urllib.request.urlretrieve(url, path)
+    print(f"Saved: {path}", file=sys.stderr)
+
+# ── Core Commands ────────────────────────────────────────────────────────────
+
+def cmd_run(model: str, params: dict, timeout: Optional[int] = None):
+    """Run a model synchronously (fast models, <30s)."""
+    fal = ensure_client()
+    os.environ["FAL_KEY"] = get_key()
+    kwargs = {"application": model, "arguments": params}
+    if timeout:
+        kwargs["timeout"] = timeout
+    result = fal.run(**kwargs)
     print(json.dumps(result, indent=2))
 
-def cmd_status(status_url: str):
-    """Check queue status"""
-    result = api_request(status_url)
+def cmd_subscribe(model: str, params: dict):
+    """Run a model via queue with auto-polling (any model, recommended)."""
+    fal = ensure_client()
+    os.environ["FAL_KEY"] = get_key()
+    result = fal.subscribe(
+        model,
+        arguments=params,
+        with_logs=True,
+        on_queue_update=on_queue_update,
+    )
     print(json.dumps(result, indent=2))
 
-def cmd_result(response_url: str):
-    """Get queued result"""
-    result = api_request(response_url)
+def cmd_submit(model: str, params: dict):
+    """Submit to queue and return handle (for long jobs you want to check later)."""
+    fal = ensure_client()
+    os.environ["FAL_KEY"] = get_key()
+    handle = fal.submit(model, arguments=params)
+    print(json.dumps({
+        "request_id": handle.request_id,
+        "status_url": f"https://queue.fal.run/{model}/requests/{handle.request_id}/status",
+        "response_url": f"https://queue.fal.run/{model}/requests/{handle.request_id}",
+    }, indent=2))
+
+def cmd_status(model: str, request_id: str):
+    """Check status of a submitted job."""
+    fal = ensure_client()
+    os.environ["FAL_KEY"] = get_key()
+    s = fal.status(model, request_id, with_logs=True)
+    print(json.dumps({
+        "status": type(s).__name__,
+        "logs": getattr(s, 'logs', []),
+    }, indent=2))
+
+def cmd_result(model: str, request_id: str):
+    """Get result of a completed job."""
+    fal = ensure_client()
+    os.environ["FAL_KEY"] = get_key()
+    result = fal.result(model, request_id)
     print(json.dumps(result, indent=2))
 
-def cmd_cancel(cancel_url: str):
-    """Cancel queued request"""
-    result = api_request(cancel_url, method="PUT")
+def cmd_cancel(model: str, request_id: str):
+    """Cancel a queued job."""
+    fal = ensure_client()
+    os.environ["FAL_KEY"] = get_key()
+    fal.cancel(model, request_id)
+    print("Cancelled.")
+
+def cmd_upload(file_path: str):
+    """Upload a local file and get a fal URL for use as input."""
+    fal = ensure_client()
+    os.environ["FAL_KEY"] = get_key()
+    url = fal.upload_file(file_path)
+    print(json.dumps({"url": url}, indent=2))
+
+def cmd_stream(model: str, params: dict):
+    """Stream results from a model (SSE)."""
+    fal = ensure_client()
+    os.environ["FAL_KEY"] = get_key()
+    events = []
+    for event in fal.stream(model, arguments=params):
+        events.append(event)
+        print(json.dumps(event), file=sys.stderr)
+    print(json.dumps(events, indent=2))
+
+# ── Image shortcut ───────────────────────────────────────────────────────────
+
+def cmd_image(prompt: str, model: str = "fal-ai/nano-banana-pro", size: str = "landscape_4_3",
+              save: Optional[str] = None, extra: Optional[dict] = None):
+    """Quick image generation with sensible defaults."""
+    params = {"prompt": prompt, "image_size": size}
+    if extra:
+        params.update(extra)
+
+    fal = ensure_client()
+    os.environ["FAL_KEY"] = get_key()
+    result = fal.subscribe(
+        model,
+        arguments=params,
+        with_logs=True,
+        on_queue_update=on_queue_update,
+    )
+
+    # Auto-download if save path given
+    images = result.get("images", [])
+    if save and images:
+        download_file(images[0]["url"], save)
+
     print(json.dumps(result, indent=2))
 
-def cmd_help():
-    """Show help"""
-    print("""
-fal.ai CLI - Generate images and content
+# ── Video shortcut ───────────────────────────────────────────────────────────
 
-Commands:
-  models [page] [total]     List available models
-  search <keywords>         Search for models
-  schema <model_id>         Get model schema
-  generate <model> <json>   Generate content (direct mode)
-  generate-queue <model> <json>  Generate content (queue mode)
-  status <url>              Check queue status
-  result <url>              Get queued result
-  cancel <url>              Cancel queued request
+def cmd_video(prompt: str, model: str = "fal-ai/minimax-video/video-01-live",
+              image_url: Optional[str] = None, save: Optional[str] = None, extra: Optional[dict] = None):
+    """Quick video generation."""
+    params = {"prompt": prompt}
+    if image_url:
+        params["image_url"] = image_url
+    if extra:
+        params.update(extra)
 
-Examples:
-  # Generate image with Flux Schnell (fast)
-  python3 fal.py generate "fal-ai/flux/schnell" '{"prompt": "a robot"}'
+    fal = ensure_client()
+    os.environ["FAL_KEY"] = get_key()
+    result = fal.subscribe(
+        model,
+        arguments=params,
+        with_logs=True,
+        on_queue_update=on_queue_update,
+    )
 
-  # Search for image models
-  python3 fal.py search "image generation"
+    video = result.get("video", {})
+    if save and video.get("url"):
+        download_file(video["url"], save)
 
-  # Queue a slow job
-  python3 fal.py generate-queue "fal-ai/flux-pro" '{"prompt": "detailed art"}'
-""")
+    print(json.dumps(result, indent=2))
+
+# ── Model discovery (raw API, no client needed) ─────────────────────────────
+
+def _api_get(url: str) -> dict:
+    req = urllib.request.Request(url, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode())
+
+def cmd_models(keywords: Optional[str] = None):
+    """List/search models."""
+    url = "https://fal.ai/api/models"
+    if keywords:
+        url += f"?keywords={urllib.parse.quote(keywords)}"
+    result = _api_get(url)
+    print(json.dumps(result, indent=2))
+
+def cmd_schema(model: str):
+    """Get model input/output schema."""
+    url = f"https://fal.ai/api/openapi/queue/openapi.json?endpoint_id={urllib.parse.quote(model)}"
+    result = _api_get(url)
+    print(json.dumps(result, indent=2))
+
+# ── CLI Dispatcher ───────────────────────────────────────────────────────────
+
+USAGE = """
+fal.ai CLI (v2 — official fal-client)
+
+QUICK COMMANDS:
+  image <prompt> [--model M] [--size S] [--save path] [--extra '{}']
+      Generate an image (default: nano-banana-pro / Imagen 3)
+
+  video <prompt> [--model M] [--image URL] [--save path] [--extra '{}']
+      Generate a video (default: minimax-video)
+
+CORE COMMANDS:
+  subscribe <model> <json>    Run model with auto-queue + polling (recommended)
+  run <model> <json>          Run model directly (fast models only)
+  submit <model> <json>       Submit to queue, get request_id back
+  status <model> <request_id> Check job status
+  result <model> <request_id> Get completed result
+  cancel <model> <request_id> Cancel a job
+  stream <model> <json>       Stream results (SSE models)
+  upload <file_path>          Upload file, get fal URL
+
+DISCOVERY:
+  models [keywords]           List/search available models
+  schema <model>              Get model input/output schema
+
+EXAMPLES:
+  python3 fal.py image "vibrant Miami sunset over Brickell"
+  python3 fal.py image "logo design" --model fal-ai/flux-pro/v1.1 --save logo.png
+  python3 fal.py subscribe fal-ai/nano-banana-pro '{"prompt":"a cat"}'
+  python3 fal.py video "ocean waves" --save waves.mp4
+  python3 fal.py upload ./my-photo.jpg
+  python3 fal.py models "video generation"
+"""
+
+def parse_extras(args: list) -> dict:
+    """Parse --key value pairs from args list."""
+    opts = {}
+    i = 0
+    while i < len(args):
+        if args[i].startswith("--") and i + 1 < len(args):
+            key = args[i][2:]
+            opts[key] = args[i + 1]
+            i += 2
+        else:
+            i += 1
+    return opts
 
 def main():
-    import urllib.parse
-    
     if len(sys.argv) < 2:
-        cmd_help()
+        print(USAGE)
         return
-    
+
     cmd = sys.argv[1].lower()
-    
-    if cmd == "models":
-        page = int(sys.argv[2]) if len(sys.argv) > 2 else None
-        total = int(sys.argv[3]) if len(sys.argv) > 3 else None
-        cmd_models(page, total)
-    elif cmd == "search":
-        if len(sys.argv) < 3:
-            print("Usage: search <keywords>", file=sys.stderr)
+    args = sys.argv[2:]
+
+    if cmd == "image":
+        if not args:
+            print("Usage: image <prompt> [--model M] [--size S] [--save path] [--extra '{}']", file=sys.stderr)
             sys.exit(1)
-        cmd_search(sys.argv[2])
-    elif cmd == "schema":
-        if len(sys.argv) < 3:
-            print("Usage: schema <model_id>", file=sys.stderr)
+        prompt = args[0]
+        opts = parse_extras(args[1:])
+        extra = parse_json(opts["extra"]) if "extra" in opts else None
+        cmd_image(prompt, model=opts.get("model", "fal-ai/nano-banana-pro"),
+                  size=opts.get("size", "landscape_4_3"), save=opts.get("save"), extra=extra)
+
+    elif cmd == "video":
+        if not args:
+            print("Usage: video <prompt> [--model M] [--image URL] [--save path]", file=sys.stderr)
             sys.exit(1)
-        cmd_schema(sys.argv[2])
-    elif cmd == "generate":
-        if len(sys.argv) < 4:
-            print("Usage: generate <model> <json_parameters>", file=sys.stderr)
-            sys.exit(1)
-        cmd_generate(sys.argv[2], sys.argv[3], queue=False)
-    elif cmd == "generate-queue":
-        if len(sys.argv) < 4:
-            print("Usage: generate-queue <model> <json_parameters>", file=sys.stderr)
-            sys.exit(1)
-        cmd_generate(sys.argv[2], sys.argv[3], queue=True)
+        prompt = args[0]
+        opts = parse_extras(args[1:])
+        extra = parse_json(opts["extra"]) if "extra" in opts else None
+        cmd_video(prompt, model=opts.get("model", "fal-ai/minimax-video/video-01-live"),
+                  image_url=opts.get("image"), save=opts.get("save"), extra=extra)
+
+    elif cmd == "subscribe":
+        if len(args) < 2:
+            print("Usage: subscribe <model> <json>", file=sys.stderr); sys.exit(1)
+        cmd_subscribe(args[0], parse_json(args[1]))
+
+    elif cmd == "run":
+        if len(args) < 2:
+            print("Usage: run <model> <json>", file=sys.stderr); sys.exit(1)
+        opts = parse_extras(args[2:])
+        timeout = int(opts["timeout"]) if "timeout" in opts else None
+        cmd_run(args[0], parse_json(args[1]), timeout=timeout)
+
+    elif cmd == "submit":
+        if len(args) < 2:
+            print("Usage: submit <model> <json>", file=sys.stderr); sys.exit(1)
+        cmd_submit(args[0], parse_json(args[1]))
+
     elif cmd == "status":
-        if len(sys.argv) < 3:
-            print("Usage: status <status_url>", file=sys.stderr)
-            sys.exit(1)
-        cmd_status(sys.argv[2])
+        if len(args) < 2:
+            print("Usage: status <model> <request_id>", file=sys.stderr); sys.exit(1)
+        cmd_status(args[0], args[1])
+
     elif cmd == "result":
-        if len(sys.argv) < 3:
-            print("Usage: result <response_url>", file=sys.stderr)
-            sys.exit(1)
-        cmd_result(sys.argv[2])
+        if len(args) < 2:
+            print("Usage: result <model> <request_id>", file=sys.stderr); sys.exit(1)
+        cmd_result(args[0], args[1])
+
     elif cmd == "cancel":
-        if len(sys.argv) < 3:
-            print("Usage: cancel <cancel_url>", file=sys.stderr)
-            sys.exit(1)
-        cmd_cancel(sys.argv[2])
-    elif cmd == "help":
-        cmd_help()
+        if len(args) < 2:
+            print("Usage: cancel <model> <request_id>", file=sys.stderr); sys.exit(1)
+        cmd_cancel(args[0], args[1])
+
+    elif cmd == "stream":
+        if len(args) < 2:
+            print("Usage: stream <model> <json>", file=sys.stderr); sys.exit(1)
+        cmd_stream(args[0], parse_json(args[1]))
+
+    elif cmd == "upload":
+        if not args:
+            print("Usage: upload <file_path>", file=sys.stderr); sys.exit(1)
+        cmd_upload(args[0])
+
+    elif cmd == "models":
+        cmd_models(args[0] if args else None)
+
+    elif cmd == "schema":
+        if not args:
+            print("Usage: schema <model>", file=sys.stderr); sys.exit(1)
+        cmd_schema(args[0])
+
+    # Legacy aliases
+    elif cmd == "generate":
+        if len(args) < 2:
+            print("Usage: generate <model> <json>", file=sys.stderr); sys.exit(1)
+        cmd_subscribe(args[0], parse_json(args[1]))
+
+    elif cmd == "generate-queue":
+        if len(args) < 2:
+            print("Usage: generate-queue <model> <json>", file=sys.stderr); sys.exit(1)
+        cmd_subscribe(args[0], parse_json(args[1]))
+
+    elif cmd in ("help", "-h", "--help"):
+        print(USAGE)
+
     else:
         print(f"Unknown command: {cmd}", file=sys.stderr)
-        cmd_help()
+        print(USAGE)
         sys.exit(1)
 
 if __name__ == "__main__":
